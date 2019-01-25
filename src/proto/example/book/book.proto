@@ -1,0 +1,11 @@
+syntax = "proto3";
+package example.book;
+
+import "example/author/author.proto";
+
+message Book {
+    int32 id = 1;
+    string name = 2;
+    string price = 3;
+    example.author.Author author = 4;
+}

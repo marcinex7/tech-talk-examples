@@ -1,0 +1,10 @@
+syntax = "proto3";
+package example.author;
+
+import "example/author/address.proto";
+
+message Author {
+    string first_name = 1;
+    string last_name = 2;
+    example.address.Address address = 3;
+}

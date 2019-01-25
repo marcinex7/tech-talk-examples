@@ -1,0 +1,6 @@
+structlog==18.2.0
+colorama==0.4.1
+
+grpcio-tools==1.17.1
+grpcio==1.17.1
+protobuf==3.6.1

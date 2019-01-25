@@ -1,0 +1,37 @@
+syntax = "proto3";
+package example.book_service;
+
+import "example/book/book.proto";
+
+service BookRpc {
+    rpc get(BookGetRequest) returns (BookGetReply) {}
+    rpc list(BookListRequest) returns (BookListReply) {}
+    rpc add(BookAddRequest) returns (BookAddReply) {}
+    rpc delete(BookDeleteRequest) returns (BookDeleteReply) {}
+}
+
+message BookGetRequest {
+    int32 id = 1;
+}
+message BookGetReply {
+    example.book.Book book = 1;
+}
+
+message BookListRequest {
+    repeated int32 ids = 1;
+}
+message BookListReply {
+    repeated example.book.Book books = 1;
+}
+
+message BookAddRequest {
+    example.book.Book book = 1;
+}
+message BookAddReply {
+    example.book.Book book = 1;
+}
+
+message BookDeleteRequest {
+    int32 id = 1;
+}
+message BookDeleteReply {}

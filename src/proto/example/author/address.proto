@@ -1,0 +1,9 @@
+syntax = "proto3";
+package example.address;
+
+message Address {
+    string city = 1;
+    string street = 2;
+    string number = 3;
+    string zip_code = 4;
+}
