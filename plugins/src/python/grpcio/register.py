@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from grpcio.grpcio_prep import GrpcioPrep
+from grpcio.tasks.grpcio_prep import GrpcioPrep
 from grpcio.tasks.grpcio_run import GrpcioRun
 from grpcio.targets.python_grpcio_library import PythonGrpcioLibrary
 from pants.build_graph.build_file_aliases import BuildFileAliases

@@ -1,5 +1,6 @@
 import platform
 import random
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -25,15 +26,11 @@ def run_server():
     server.start()
 
     LOG.info("Server is running...")
-    LOG.info("(hit Ctrl+C to stop)")
+    LOG.info("(hit Enter to stop)")
 
-    try:
-        while True:
-            time.sleep(10)
-    except KeyboardInterrupt:
-        server.stop(0)
+    input("")
+    server.stop(100)
 
-    LOG.info("")
     LOG.info("Server shutdown")
 
 

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import functools
 
-from grpcio.grpcio_prep import GrpcioPrep
+from grpcio.tasks.grpcio_prep import GrpcioPrep
 from grpcio.targets.python_grpcio_library import PythonGrpcioLibrary
 
 from pants.backend.python.targets.python_library import PythonLibrary

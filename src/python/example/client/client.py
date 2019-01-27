@@ -81,6 +81,7 @@ if __name__ == "__main__":
     init_logging()
     LOG.info(f"Python version: [{platform.python_version()}]")
     LOG.info("Client is running")
+    LOG.info("")
 
     with grpc.insecure_channel("localhost:5001") as channel:
         run_client(BookRpcStub(channel))
