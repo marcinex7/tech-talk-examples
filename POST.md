@@ -76,7 +76,7 @@ it's done in `book/BUILD`:
 
 ### Service
 
-Service description is places in `book-service.proto` file, which imports `book.proto` for demo purpouses. 
+Service description is places in `book-service.proto` file, which imports `book.proto` for demo purposes. 
 
 * book-service.proto:
 ```proto
@@ -206,7 +206,7 @@ class GrpcioPrep(PythonToolPrepBase):
 
 As described in documentation: *"A subsystem is some configurable part of Pants that can be used across multiple tasks and other parts of the system, including other subsystems"*  
 
-Here, we are extending pants base class `PythonToolBase`, which is built in subsystem to create pex libraries with some dependencies. All we need to do, is provide a default **entry point** and default **requirements** as well as **scope** - a name to retieve this subsystem from pants context.
+Here, we are extending pants base class `PythonToolBase`, which is built in subsystem to create pex libraries with some dependencies. All we need to do, is provide a default **entry point** and default **requirements** as well as **scope** - a name to retrieve this subsystem from pants context.
 
 `grpcio.py`:
 ```python
@@ -239,9 +239,9 @@ Now we are ready to use it in order to generate python classes from our proto fi
 Pants SDK provides a base task class for code generation: `SimpleCodegenTask` which handles few problems: 
  * resolves your target dependencies and gathers sources,
  * provide output directory caching capabilities,
- * ensures, that output directory is 'reachible' from other pants targets
+ * ensures, that output directory is 'reachable' from other pants targets
  
-Last point is espacially usefull, as we don't need to create or maintain output directory for our generated python code. Thos classes will be just visible for any other `python_target`'s, which will have a dependency to our `python_grpcio_library`. 
+Last point is especially useful, as we don't need to create or maintain output directory for our generated python code. Those classes will be just visible for any other `python_target`'s, which will have a dependency to our `python_grpcio_library`. 
 
 Let's look into an example BUILD file to see how it works:
 `src/python/example/server/BUILD`:
@@ -258,5 +258,60 @@ python_binary(
 So our `python_binary` depends directly on our **proto** catalog, and pants ensures, that generated python classes will be visible there.
 
 ### Task GrpcioRun
+
+This is a class, where we actually invoke our .pex file. We need to specify, what are locations of our proto files as well as where output classes should be placed. 
+
+First of all, we need to retrieve our .pex file - as an `GrpcioInstance` in our case:
+
+```python
+  @classmethod
+  def prepare(cls, options, round_manager):
+    super(GrpcioRun, cls).prepare(options, round_manager)
+    round_manager.require_data(GrpcioPrep.tool_instance_cls)
+    
+  @memoized_property
+  def _grpcio_binary(self):
+    return self.context.products.get_data(GrpcioPrep.tool_instance_cls)
+```
+
+Method `prepare` is telling pants, that we will need product of another task in our `execute` method, so patns can ensure, that our task will be executed in certain order.
+
+After that, we are preparing a method, which will look into pants context and search for our `GrpcioInstance`, prepared in `GrpcioPrep` task.
+
+Real execution now simplifies to provide few paths:
+* `proto_path`
+* `python_out`
+* `grpc_python_out`
+* desired proto sources
+
+and execute our .pex file in another process. This is done in `build_args` and `execute_codegen` methods shown below:
+
+```python
+  def execute_codegen(self, target, target_workdir):
+    args = self.build_args(target, target_workdir)
+    self.context.log.debug("Executing grpcio code generation with args: [{}]".format(args))
+
+    with pushd(get_buildroot()):
+      workunit_factory = functools.partial(self.context.new_workunit,
+                                           name='run-grpcio',
+                                           labels=[WorkUnitLabel.TOOL, WorkUnitLabel.LINT])
+      cmdline, exit_code = self._grpcio_binary.run(workunit_factory, args)
+      if exit_code != 0:
+        raise TaskError('{} ... exited non-zero ({}).'.format(cmdline, exit_code),
+                        exit_code=exit_code)
+      self.context.log.info("Grpcio finished code generation into: [{}]".format(target_workdir))
+
+  def build_args(self, target, target_workdir):
+    proto_path = '--proto_path={0}'.format(target.target_base)
+    python_out = '--python_out={0}'.format(target_workdir)
+    grpc_python_out = '--grpc_python_out={0}'.format(target_workdir)
+
+    args = [python_out, grpc_python_out, proto_path]
+
+    args.extend(target.sources_relative_to_buildroot())
+    return args
+```
+
+### Running
 
 
